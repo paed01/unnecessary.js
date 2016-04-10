@@ -1,0 +1,38 @@
+{
+  "name": "unnecessary",
+  "version": "0.0.1",
+  "description": "Check for files not required throughout the project",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "coverage": "istanbul cover node_modules/.bin/_mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paed01/unnecessary.js.git"
+  },
+  "engines": {
+    "node": ">= 0.8.x"
+  },
+  "keywords": [
+    "unused",
+    "unnecessary",
+    "not required",
+    "require",
+    "cache",
+    "project",
+    "tree"
+  ],
+  "author": "Pål Edman <pal.edman@outlook.com>",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/paed01/unnecessary.js/issues"
+  },
+  "homepage": "https://github.com/paed01/unnecessary.js#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "eslint": "^2.7.0",
+    "istanbul": "^0.4.3",
+    "mocha": "^2.4.5"
+  }
+}
