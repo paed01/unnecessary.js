@@ -4,15 +4,14 @@
   "description": "Check for files not required throughout the project",
   "main": "index.js",
   "scripts": {
-    "test": "mocha && ./node_modules/.bin/eslint . --cache",
-    "coverage": "istanbul cover node_modules/.bin/_mocha"
+    "test": "istanbul cover node_modules/.bin/_mocha && ./node_modules/.bin/eslint . --cache"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/paed01/unnecessary.js.git"
   },
   "engines": {
-    "node": ">= 0.8.x"
+    "node": ">= 0.10.x"
   },
   "keywords": [
     "unused",
