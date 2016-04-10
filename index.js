@@ -5,15 +5,14 @@ var Path = require('path');
 
 var internals = {};
 var defaultOptions = {
+  cwd: process.cwd(),
   filePattern: /.+?\.(js|json)$/i,
-  excludeDirs: ['node_modules', '.git'],
-  absolute: false
+  excludeDirs: ['node_modules', '.git']
 };
 
 module.exports = internals.init = function(options) {
   internals.options = applyOptions(options);
-  internals.cwd = process.cwd();
-  internals.files = internals.traverse([internals.cwd], internals.options);
+  internals.files = internals.traverse([internals.options.cwd], internals.options);
   return internals;
 };
 
@@ -21,7 +20,7 @@ internals.untouched = function() {
   var untouched = [];
   internals.files.forEach(function(file) {
     if (!require.cache[file]) {
-      untouched.push(getRelativePath(file, internals.cwd));
+      untouched.push(Path.relative(internals.options.cwd, file));
     }
   });
   return untouched;
@@ -47,7 +46,7 @@ internals.traverse = function(paths, options) {
         return;
       }
 
-      if (stat.isFile() && options.filePattern.test(filename) && Path.basename(file)[0] !== '.') {
+      if (stat.isFile() && options.filePattern.test(filename)) {
         files.push(file);
       }
     });
@@ -78,8 +77,4 @@ function applyOptions(options) {
     }
   });
   return appliedOptions;
-}
-
-function getRelativePath(file, cwd) {
-  return Path.relative(cwd, file);
 }
