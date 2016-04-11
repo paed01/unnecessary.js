@@ -15,8 +15,8 @@ describe('unnecessary', function() {
     it('excludes node_modules and .git by default', function() {
       var unnecessary = require('../')();
       unnecessary.files.forEach(function(file) {
-        expect(file, file).to.not.match(/^node_modules\//i);
-        expect(file, file).to.not.match(/^\.git\//i);
+        expect(file, file).to.not.include(unnecessary.options.cwd + '/node_modules/');
+        expect(file, file).to.not.include(unnecessary.options.cwd + '/.git/');
       });
     });
 
@@ -26,8 +26,28 @@ describe('unnecessary', function() {
       });
       expect(unnecessary.files).to.have.length.above(0);
       unnecessary.files.forEach(function(file) {
-        expect(file, file).to.not.match(/^test\//i);
+        expect(file, file).to.not.include(unnecessary.options.cwd + '/test/');
       });
+    });
+
+    it('excludeDirs option works with relative path', function() {
+      var unnecessary = require('../')({
+        excludeDirs: ['test/data']
+      });
+
+      expect(unnecessary.files).to.have.length.above(0);
+      expect(unnecessary.files).to.not.include(unnecessary.options.cwd + '/test/data/arbitrary.json');
+      expect(unnecessary.files).to.not.include(unnecessary.options.cwd + '/test/data/arbitrary.js');
+    });
+
+    it('excludeDirs option is trimmed of trailing slash (/)', function() {
+      var unnecessary = require('../')({
+        excludeDirs: ['test/data/']
+      });
+
+      expect(unnecessary.files).to.have.length.above(0);
+      expect(unnecessary.files).to.not.include(unnecessary.options.cwd + '/test/data/arbitrary.json');
+      expect(unnecessary.files).to.not.include(unnecessary.options.cwd + '/test/data/arbitrary.js');
     });
 
     it('default filePattern option includes js and json extensions', function() {
@@ -79,7 +99,7 @@ describe('unnecessary', function() {
     });
   });
 
-  describe('#unused', function() {
+  describe('#untouched', function() {
     it('compares project tree with require.cache', function() {
       var unnecessary = require('../')();
       var untouched = unnecessary.untouched();

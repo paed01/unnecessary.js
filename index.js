@@ -41,7 +41,7 @@ internals.traverse = function(paths, options) {
       var file = Path.join(path, filename);
 
       var stat = Fs.statSync(file);
-      if (stat.isDirectory() && options.excludeDirs.indexOf(filename) === -1) {
+      if (stat.isDirectory() && options.excludeDirs.indexOf(file) === -1) {
         files = files.concat(traverse(file, options));
         return;
       }
@@ -76,5 +76,16 @@ function applyOptions(options) {
       appliedOptions[key] = defaultOptions[key];
     }
   });
+  appliedOptions.excludeDirs = applyOptionExludeDirs(appliedOptions.cwd, appliedOptions.excludeDirs);
+
   return appliedOptions;
+}
+
+function applyOptionExludeDirs(cwd, option) {
+  var excludeDirs = option.map(function(dir) {
+    dir = dir.replace(/\/$/, '');
+    return Path.normalize(Path.join(cwd, dir));
+  });
+
+  return excludeDirs;
 }

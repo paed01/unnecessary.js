@@ -10,7 +10,7 @@ Ligthweight coverage for huge projects. Check for files never required troughout
 Options:
 - `cwd`: Project working directory, defaults to `process.cwd()`
 - `filePattern`: Defaults to js and json extensions
-- `excludeDirs`: Array with directories to exclude. Default is node_modules and .git. Any additional directories are appended to default list
+- `excludeDirs`: Array with directories to exclude, use relative paths, e.g. `app/assets`. Default is `node_modules` and `.git`. Any additional directories are appended to default list.
 
 ```javascript
 // Before testing, e.g. in mocha setup
@@ -19,5 +19,6 @@ var unnecessary = require('unnecessary')({
 });
 
 // When testing is completed run
-var unusedScripts = unnecessary.unused();
+var unusedScripts = unnecessary.untouched();
 ```
+
