@@ -3,6 +3,8 @@
 var expect = require('chai').expect;
 var Path = require('path');
 
+require('../')();
+
 describe('unnecessary', function() {
   describe('require', function() {
     it('traverses the project tree', function() {
@@ -88,6 +90,14 @@ describe('unnecessary', function() {
       var unnecessary = require('../')();
       var untouched = unnecessary.untouched();
 
+      expect(untouched).to.include('test/data/arbitrary.json');
+      expect(untouched).to.include('test/data/arbitrary.js');
+    });
+
+    it('works with require cached instance of module', function() {
+      var untouched = require('../').untouched();
+
+      expect(untouched).to.have.length.above(0);
       expect(untouched).to.include('test/data/arbitrary.json');
       expect(untouched).to.include('test/data/arbitrary.js');
     });

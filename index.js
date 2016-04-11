@@ -10,7 +10,7 @@ var defaultOptions = {
   excludeDirs: ['node_modules', '.git']
 };
 
-module.exports = internals.init = function(options) {
+module.exports = internals = function(options) {
   internals.options = applyOptions(options);
   internals.files = internals.traverse([internals.options.cwd], internals.options);
   return internals;

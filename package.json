@@ -1,6 +1,6 @@
 {
   "name": "unnecessary",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Check for files not required throughout the project",
   "main": "index.js",
   "scripts": {
