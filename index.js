@@ -1,7 +1,7 @@
 'use strict';
 
 var Fs = require('fs');
-var Path = require('path').posix;
+var Path = require('path');
 
 var internals = {};
 var defaultOptions = {
