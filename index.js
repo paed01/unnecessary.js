@@ -1,7 +1,7 @@
 'use strict';
 
 var Fs = require('fs');
-var Path = require('path');
+var Path = require('path').posix;
 
 var internals = {};
 var defaultOptions = {
@@ -20,7 +20,7 @@ internals.untouched = function() {
   var untouched = [];
   internals.files.forEach(function(file) {
     if (!require.cache[file]) {
-      untouched.push(Path.relative(internals.options.cwd, file));
+      untouched.push(relativePath(internals.options.cwd, file));
     }
   });
   return untouched;
@@ -88,4 +88,12 @@ function applyOptionExludeDirs(cwd, option) {
   });
 
   return excludeDirs;
+}
+
+function relativePath(from, to) {
+  var relative = Path.relative(from, to);
+  if (Path.sep !== '/') {
+    relative = relative.split(Path.sep).join('/');
+  }
+  return relative;
 }

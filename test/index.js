@@ -3,9 +3,15 @@
 var expect = require('chai').expect;
 var Path = require('path');
 
+var pathSep = Path.sep;
+
 require('../')();
 
 describe('unnecessary', function() {
+  after(function() {
+    Path.sep = pathSep;
+  });
+
   describe('require', function() {
     it('traverses the project tree', function() {
       var unnecessary = require('../')();
@@ -115,6 +121,15 @@ describe('unnecessary', function() {
     });
 
     it('works with require cached instance of module', function() {
+      var untouched = require('../').untouched();
+
+      expect(untouched).to.have.length.above(0);
+      expect(untouched).to.include('test/data/arbitrary.json');
+      expect(untouched).to.include('test/data/arbitrary.js');
+    });
+
+    it('untouched files are always reported with path separator /', function() {
+      Path.sep = '//';
       var untouched = require('../').untouched();
 
       expect(untouched).to.have.length.above(0);
