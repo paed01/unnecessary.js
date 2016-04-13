@@ -8,7 +8,7 @@ var pathSep = Path.sep;
 require('../')();
 
 describe('unnecessary', function() {
-  after(function() {
+  afterEach(function() {
     Path.sep = pathSep;
   });
 
@@ -129,7 +129,7 @@ describe('unnecessary', function() {
     });
 
     it('untouched files are always reported with path separator /', function() {
-      Path.sep = '//';
+      Path.sep = '\\';
       var untouched = require('../').untouched();
 
       expect(untouched).to.have.length.above(0);
