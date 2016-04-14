@@ -1,6 +1,6 @@
 {
   "name": "unnecessary",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Check for files not required throughout the project",
   "main": "index.js",
   "scripts": {
@@ -18,10 +18,10 @@
     "unused",
     "unnecessary",
     "not required",
-    "require",
-    "cache",
+    "require cache",
     "project",
-    "tree"
+    "tree",
+    "lightweight coverage"
   ],
   "author": "Pål Edman <pal.edman@outlook.com>",
   "license": "BSD-3-Clause",
