@@ -5,14 +5,15 @@ unnecessary
 [![Windows build status](https://ci.appveyor.com/api/projects/status/gnydnbvuuavfcj5l/branch/master?svg=true)](https://ci.appveyor.com/project/paed01/unnecessary-js/branch/master)
 [![Coverage Status](https://coveralls.io/repos/github/paed01/unnecessary.js/badge.svg?branch=master)](https://coveralls.io/github/paed01/unnecessary.js?branch=master)
 
-Ligthweight coverage for huge projects. Check for files never required troughout testing. Compares project tree with require cache.
+Keep track of your files. Ligthweight coverage for huge projects. Check for files never required troughout testing. Compares project tree with require cache.
 
 # Description
 
 Options:
 - `cwd`: Project working directory, defaults to `process.cwd()`
 - `filePattern`: Regex pattern, Defaults to js and json extensions
-- `excludeDirs`: Array with directories to exclude, use relative paths, e.g. `app/assets`. Default is `node_modules` and `.git`. Any additional directories are appended to default list.
+- `excludeDirs`: Array with directories to exclude, use relative paths, e.g. `app/assets`. Default is `node_modules` and `.git`. Option is appended to the default list
+- `excludeFiles`: Array with files to exclude, use relative paths, e.g. `test/data/arbitrary.json`. Default is `package.json`. Option is appended to the default list
 
 ```javascript
 // Before testing, e.g. in mocha setup

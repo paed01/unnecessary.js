@@ -7,18 +7,19 @@ var internals = {};
 var defaultOptions = {
   cwd: process.cwd(),
   filePattern: /.+?\.(js|json)$/i,
-  excludeDirs: ['node_modules', '.git']
+  excludeDirs: ['node_modules', '.git'],
+  excludeFiles: ['package.json']
 };
 
 module.exports = internals = function(options) {
-  var self = this || internals;
+  var self = typeof this === 'object' ? this : internals;
   self.options = applyOptions(options);
   self.files = internals.traverse([self.options.cwd], self.options);
   return self;
 };
 
 internals.untouched = internals.prototype.untouched = function() {
-  var self = this || internals;
+  var self = typeof this === 'object' ? this : internals;
   var untouched = [];
   if (!self.files) return untouched;
   self.files.forEach(function(file) {
@@ -31,13 +32,17 @@ internals.untouched = internals.prototype.untouched = function() {
 
 internals.traverse = function(paths, options) {
 
-  var traverse = function(path) {
+  function traverse(path) {
 
     var files = [];
 
     var pathStat = Fs.statSync(path);
     if (pathStat.isFile()) {
-      return path;
+      var pathDir = Path.dirname(options.cwd);
+      if (keepFile(options, relativePath(pathDir, path))) {
+        return path;
+      }
+      return null;
     }
 
     Fs.readdirSync(path).forEach(function(filename) {
@@ -49,17 +54,19 @@ internals.traverse = function(paths, options) {
         return;
       }
 
-      if (stat.isFile() && options.filePattern.test(filename)) {
+      if (stat.isFile() && keepFile(options, relativePath(options.cwd, file))) {
         files.push(file);
       }
     });
 
     return files;
-  };
+  }
 
   var testFiles = [];
   paths.forEach(function(path) {
-    testFiles = testFiles.concat(traverse(path));
+    testFiles = testFiles.concat(traverse(path)).filter(function(file) {
+      return file;
+    });
   });
 
   testFiles = testFiles.map(function(path) {
@@ -74,6 +81,7 @@ function applyOptions(options) {
   Object.keys(defaultOptions).forEach(function(key) {
     if (options && options[key]) {
       if (key === 'excludeDirs') appliedOptions[key] = defaultOptions.excludeDirs.concat(options[key]);
+      else if (key === 'excludeFiles') appliedOptions[key] = defaultOptions.excludeFiles.concat(options[key]);
       else appliedOptions[key] = options[key];
     } else {
       appliedOptions[key] = defaultOptions[key];
@@ -99,4 +107,8 @@ function relativePath(from, to) {
     relative = relative.split(Path.sep).join('/');
   }
   return relative;
+}
+
+function keepFile(options, file) {
+  return options.filePattern.test(file) && options.excludeFiles.indexOf(file) === -1;
 }

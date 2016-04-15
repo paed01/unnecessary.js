@@ -56,6 +56,16 @@ describe('unnecessary', function() {
       expect(unnecessary.files).to.not.include(unnecessary.options.cwd + '/test/data/arbitrary.js');
     });
 
+    it('excludeFiles option works with relative path', function() {
+      var unnecessary = require('../')({
+        excludeFiles: ['test/data/arbitrary.json']
+      });
+
+      expect(unnecessary.files).to.have.length.above(0);
+      expect(unnecessary.files).to.not.include(unnecessary.options.cwd + '/test/data/arbitrary.json');
+      expect(unnecessary.files).to.include(unnecessary.options.cwd + '/test/data/arbitrary.js');
+    });
+
     it('default filePattern option includes js and json extensions', function() {
       var unnecessary = require('../')();
 
@@ -104,7 +114,15 @@ describe('unnecessary', function() {
       expect(unnecessary.files).to.deep.equal([__filename]);
     });
 
-    describe('#ctor', function() {
+    it('cwd option as file included in excludeFiles returns empty array', function() {
+      var unnecessary = require('../')({
+        cwd: Path.resolve('./package.json')
+      });
+
+      expect(unnecessary.files).to.have.length(0);
+    });
+
+    describe('instance', function() {
       var Unnecessary = require('../');
 
       it('can be used with new', function() {
