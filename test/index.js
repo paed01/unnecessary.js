@@ -21,8 +21,8 @@ describe('unnecessary', function() {
     it('excludes node_modules and .git by default', function() {
       var unnecessary = require('../')();
       unnecessary.files.forEach(function(file) {
-        expect(file, file).to.not.include(unnecessary.options.cwd + '/node_modules/');
-        expect(file, file).to.not.include(unnecessary.options.cwd + '/.git/');
+        expect(file, file).to.not.include(Path.normalize(unnecessary.options.cwd + '/node_modules/'));
+        expect(file, file).to.not.include(Path.normalize(unnecessary.options.cwd + '/.git/'));
       });
     });
 
@@ -32,7 +32,7 @@ describe('unnecessary', function() {
       });
       expect(unnecessary.files).to.have.length.above(0);
       unnecessary.files.forEach(function(file) {
-        expect(file, file).to.not.include(unnecessary.options.cwd + '/test/');
+        expect(file, file).to.not.include(Path.normalize(unnecessary.options.cwd + '/test/'));
       });
     });
 
@@ -42,8 +42,8 @@ describe('unnecessary', function() {
       });
 
       expect(unnecessary.files).to.have.length.above(0);
-      expect(unnecessary.files).to.not.include(unnecessary.options.cwd + '/test/data/arbitrary.json');
-      expect(unnecessary.files).to.not.include(unnecessary.options.cwd + '/test/data/arbitrary.js');
+      expect(unnecessary.files).to.not.include(Path.normalize(unnecessary.options.cwd + '/test/data/arbitrary.json'));
+      expect(unnecessary.files).to.not.include(Path.normalize(unnecessary.options.cwd + '/test/data/arbitrary.js'));
     });
 
     it('excludeDirs option is trimmed of trailing slash (/)', function() {
@@ -52,8 +52,8 @@ describe('unnecessary', function() {
       });
 
       expect(unnecessary.files).to.have.length.above(0);
-      expect(unnecessary.files).to.not.include(unnecessary.options.cwd + '/test/data/arbitrary.json');
-      expect(unnecessary.files).to.not.include(unnecessary.options.cwd + '/test/data/arbitrary.js');
+      expect(unnecessary.files).to.not.include(Path.normalize(unnecessary.options.cwd + '/test/data/arbitrary.json'));
+      expect(unnecessary.files).to.not.include(Path.normalize(unnecessary.options.cwd + '/test/data/arbitrary.js'));
     });
 
     it('excludeFiles option works with relative path', function() {
@@ -62,8 +62,8 @@ describe('unnecessary', function() {
       });
 
       expect(unnecessary.files).to.have.length.above(0);
-      expect(unnecessary.files).to.not.include(unnecessary.options.cwd + '/test/data/arbitrary.json');
-      expect(unnecessary.files).to.include(unnecessary.options.cwd + '/test/data/arbitrary.js');
+      expect(unnecessary.files).to.not.include(Path.normalize(unnecessary.options.cwd + '/test/data/arbitrary.json'));
+      expect(unnecessary.files).to.include(Path.normalize(unnecessary.options.cwd + '/test/data/arbitrary.js'));
     });
 
     it('default filePattern option includes js and json extensions', function() {
