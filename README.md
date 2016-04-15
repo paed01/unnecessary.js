@@ -11,7 +11,7 @@ Ligthweight coverage for huge projects. Check for files never required troughout
 
 Options:
 - `cwd`: Project working directory, defaults to `process.cwd()`
-- `filePattern`: Defaults to js and json extensions
+- `filePattern`: Regex pattern, Defaults to js and json extensions
 - `excludeDirs`: Array with directories to exclude, use relative paths, e.g. `app/assets`. Default is `node_modules` and `.git`. Any additional directories are appended to default list.
 
 ```javascript
@@ -19,8 +19,55 @@ Options:
 var unnecessary = require('unnecessary')({
   filePattern: /\.js$/i
 });
-
-// When testing is completed run
-var unusedScripts = unnecessary.untouched();
 ```
 
+When testing has completed run
+```javascript
+var unusedScriptsOrJsons = unnecessary.untouched();
+```
+
+The module can also be instantiated with new to get a standalone instance.
+
+```javascript
+var Unnecessary = require('unnecessary');
+var unnecessaryCoffee = new Unnecessary({
+  filePattern: /\.coffee$/i
+});
+
+var unnecessaryJs = new Unnecessary({
+  filePattern: /\.js$/i
+});
+
+// Print watched files
+console.log(unnecessaryCoffee.files)
+console.log(unnecessaryJs.files)
+```
+
+# Report after test completion
+
+Since test frameworks (mocha or lab) don´t have a easy way to know if the test has completed it is possible to listen for process exit.
+
+Example setup-file to be used with `mocha.opts` `--require` property:
+```javascript
+'use strict';
+
+var Unnecessary = require('unnecessary');
+var unnecessary = new Unnecessary({
+  excludeDirs: ['coverage']
+});
+
+process.on('exit', function(code, signal) {
+  if (!signal && code === 0) {
+    log();
+  }
+});
+
+function log() {
+  var untouched = unnecessary.untouched();
+  if (!untouched.length) return;
+  console.log('\n\x1b[31mFound %d potentially unused file%s:\x1b[0m', untouched.length, untouched.length > 1 ? 's' : '');
+  unnecessary.untouched().forEach(function(file) {
+    console.log('\x1b[33m  %s\x1b[0m', file);
+  });
+}
+```

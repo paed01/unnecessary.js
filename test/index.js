@@ -103,9 +103,46 @@ describe('unnecessary', function() {
 
       expect(unnecessary.files).to.deep.equal([__filename]);
     });
+
+    describe('#ctor', function() {
+      var Unnecessary = require('../');
+
+      it('can be used with new', function() {
+        var unnecessary = new Unnecessary({
+          filePattern: /\.js$/i
+        });
+        expect(unnecessary.files).to.have.length.above(0);
+        unnecessary.files.forEach(function(file) {
+          expect(file, file).to.match(/\.(js|json)$/i);
+        });
+      });
+
+      it('keeps instance variables', function() {
+        var unnecessaryJs = new Unnecessary({
+          filePattern: /\.js$/i
+        });
+        var unnecessaryJson = new Unnecessary({
+          filePattern: /\.json$/i
+        });
+        expect(unnecessaryJs.files).to.have.length.above(0);
+        unnecessaryJs.files.forEach(function(file) {
+          expect(file, file).to.match(/\.js$/i);
+        });
+        expect(unnecessaryJson.files).to.have.length.above(0);
+        unnecessaryJson.files.forEach(function(file) {
+          expect(file, file).to.match(/\.json$/i);
+        });
+      });
+    });
   });
 
   describe('#untouched', function() {
+    it('returns nothing if ctor not called', function() {
+      delete require.cache[require.resolve('../')];
+      var untouched = require('../').untouched();
+      expect(untouched).to.have.length(0);
+    });
+
     it('compares project tree with require.cache', function() {
       var unnecessary = require('../')();
       var untouched = unnecessary.untouched();
@@ -135,6 +172,30 @@ describe('unnecessary', function() {
       expect(untouched).to.have.length.above(0);
       expect(untouched).to.include('test/data/arbitrary.json');
       expect(untouched).to.include('test/data/arbitrary.js');
+    });
+
+    describe('instance', function() {
+      var Unnecessary = require('../');
+
+      it('returns instance specific files', function() {
+        var unnecessaryJs = new Unnecessary({
+          filePattern: /\.js$/i
+        });
+        var unnecessaryJson = new Unnecessary({
+          filePattern: /\.json$/i,
+          cwd: Path.resolve('./test')
+        });
+
+        var untouchedJs = unnecessaryJs.untouched();
+        expect(untouchedJs).to.have.length.above(0);
+        expect(untouchedJs).to.not.include('test/data/arbitrary.json');
+        expect(untouchedJs).to.include('test/data/arbitrary.js');
+
+        var untouchedJson = unnecessaryJson.untouched();
+        expect(untouchedJson).to.have.length.above(0);
+        expect(untouchedJson).to.include('data/arbitrary.json');
+        expect(untouchedJson).to.not.include('data/arbitrary.js');
+      });
     });
   });
 });

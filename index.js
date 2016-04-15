@@ -11,16 +11,19 @@ var defaultOptions = {
 };
 
 module.exports = internals = function(options) {
-  internals.options = applyOptions(options);
-  internals.files = internals.traverse([internals.options.cwd], internals.options);
-  return internals;
+  var self = this || internals;
+  self.options = applyOptions(options);
+  self.files = internals.traverse([self.options.cwd], self.options);
+  return self;
 };
 
-internals.untouched = function() {
+internals.untouched = internals.prototype.untouched = function() {
+  var self = this || internals;
   var untouched = [];
-  internals.files.forEach(function(file) {
+  if (!self.files) return untouched;
+  self.files.forEach(function(file) {
     if (!require.cache[file]) {
-      untouched.push(relativePath(internals.options.cwd, file));
+      untouched.push(relativePath(self.options.cwd, file));
     }
   });
   return untouched;
