@@ -46,9 +46,9 @@ console.log(unnecessaryJs.files)
 
 # Report after test completion
 
-Since test frameworks (mocha or lab) don´t have a easy way to know if the test has completed it is possible to listen for process exit.
+To make the module report unused files after test completion - listen for process exit.
 
-Example setup-file to be used with `mocha.opts` `--require` property:
+Example setup-file to be used with `mocha.opts` `--require` argument:
 ```javascript
 'use strict';
 
@@ -69,6 +69,33 @@ function log() {
   console.log('\n\x1b[31mFound %d potentially unused file%s:\x1b[0m', untouched.length, untouched.length > 1 ? 's' : '');
   unnecessary.untouched().forEach(function(file) {
     console.log('\x1b[33m  %s\x1b[0m', file);
+  });
+}
+```
+
+or more fancy es6:
+
+```javascript
+'use strict';
+
+const Unnecessary = require('unnecessary');
+const unnecessary = new Unnecessary({
+  excludeDirs: ['coverage']
+});
+
+process.on('exit', (code, signal) => {
+  if (!signal && code === 0) {
+    log();
+  }
+});
+
+function log() {
+  /* eslint no-console:0 */
+  let untouched = unnecessary.untouched();
+  if (!untouched.length) return;
+  console.log(`\n\x1b[31mFound ${untouched.length} potentially unused file${untouched.length > 1 ? 's' : ''}:\x1b[0m`);
+  unnecessary.untouched().forEach((file) => {
+    console.log(`  \x1b[33m${file}\x1b[0m`);
   });
 }
 ```
