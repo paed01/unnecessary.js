@@ -1,7 +1,11 @@
 {
   "name": "unnecessary",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "Check for files not required throughout the project",
+  "author": {
+    "name": "Pål Edman",
+    "url": "https://github.com/paed01"
+  },
   "main": "index.js",
   "scripts": {
     "test": "istanbul cover node_modules/.bin/_mocha && ./node_modules/.bin/eslint . --cache",
@@ -28,7 +32,6 @@
     "tree",
     "lightweight coverage"
   ],
-  "author": "Pål Edman <pal.edman@outlook.com>",
   "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/paed01/unnecessary.js/issues"
