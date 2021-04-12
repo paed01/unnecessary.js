@@ -1,9 +1,12 @@
-/* eslint no-process-exit:0 no-console:0 */
 'use strict';
 
-var Unnecessary = require('../');
+process.env.NODE_ENV = 'test';
+global.expect = require('chai').expect;
+
+var Unnecessary = require('./');
 var unnecessary = new Unnecessary({
-  excludeDirs: ['coverage']
+  excludeDirs: ['.nyc_output', 'coverage'],
+  excludeFiles: ['package-lock.json', '.eslintrc.json', 'test/.eslintrc.json'],
 });
 
 process.on('exit', function(code, signal) {
@@ -11,6 +14,12 @@ process.on('exit', function(code, signal) {
     log();
   }
 });
+
+module.exports = {
+  reporter: 'spec',
+  recursive: false,
+  timeout: 1000,
+};
 
 function log() {
   var untouched = unnecessary.untouched();

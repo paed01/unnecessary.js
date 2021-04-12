@@ -1,9 +1,12 @@
-node_modules
-npm-debug.log
-.DS_Store
-logs/
-temp/
 *.bat
+*.tgz
+.DS_Store
 .env
 .eslintcache
+.nyc_output
 /coverage
+logs/
+node_modules
+npm-debug.log
+package-lock.json
+temp/
