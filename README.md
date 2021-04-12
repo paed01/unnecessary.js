@@ -1,9 +1,9 @@
 unnecessary
 ===========
 
-[![Build Status](https://travis-ci.com/paed01/unnecessary.js.svg?branch=master)](https://travis-ci.com/paed01/unnecessary.js)
-[![Windows build status](https://ci.appveyor.com/api/projects/status/gnydnbvuuavfcj5l/branch/master?svg=true)](https://ci.appveyor.com/project/paed01/unnecessary-js/branch/master)
-[![Coverage Status](https://coveralls.io/repos/github/paed01/unnecessary.js/badge.svg?branch=master)](https://coveralls.io/github/paed01/unnecessary.js?branch=master)
+[![Build Status](https://travis-ci.com/paed01/unnecessary.js.svg?branch=default)](https://travis-ci.com/paed01/unnecessary.js)
+[![Windows build status](https://ci.appveyor.com/api/projects/status/gnydnbvuuavfcj5l/branch/default?svg=true)](https://ci.appveyor.com/project/paed01/unnecessary-js/branch/default)
+[![Coverage Status](https://coveralls.io/repos/github/paed01/unnecessary.js/badge.svg?branch=default)](https://coveralls.io/github/paed01/unnecessary.js?branch=default)
 
 Keep track of your files. Ligthweight coverage for huge projects. Check for files never required troughout testing. Compares project tree with require cache.
 
