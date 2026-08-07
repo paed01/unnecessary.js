@@ -1,27 +1,40 @@
 {
   "name": "unnecessary",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Check for files not required throughout the project",
   "author": {
     "name": "Pål Edman",
     "url": "https://github.com/paed01"
   },
-  "main": "index.js",
+  "type": "module",
+  "main": "./main.cjs",
+  "module": "./index.js",
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./main.cjs"
+    }
+  },
   "scripts": {
+    "build": "rollup -c",
+    "prepare": "npm run build",
+    "pretest": "npm run build",
     "test": "mocha",
     "posttest": "eslint . --cache",
-    "cov:html": "nyc mocha && nyc report --reporter=html",
-    "test:lcov": "nyc mocha && nyc report --reporter lcov && npm run posttest"
+    "cov:html": "npm run build && c8 --reporter=html mocha",
+    "format": "prettier . --write",
+    "test:lcov": "npm run build && c8 --reporter=lcov mocha && npm run posttest"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/paed01/unnecessary.js.git"
   },
   "engines": {
-    "node": ">= 10"
+    "node": ">=20"
   },
   "files": [
-    "index.js"
+    "index.js",
+    "main.cjs"
   ],
   "keywords": [
     "unused",
@@ -38,9 +51,13 @@
   },
   "homepage": "https://github.com/paed01/unnecessary.js#readme",
   "devDependencies": {
-    "chai": "^4.3.4",
-    "eslint": "^7.24.0",
-    "mocha": "^8.3.2",
-    "nyc": "^15.1.0"
+    "@eslint/js": "^10.0.1",
+    "c8": "^12.0.0",
+    "chai": "^6.2.2",
+    "eslint": "^10.8.0",
+    "globals": "^17.9.0",
+    "mocha": "^11.8.0",
+    "prettier": "^3.9.6",
+    "rollup": "^4.0.0"
   }
 }

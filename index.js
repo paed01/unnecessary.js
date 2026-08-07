@@ -1,54 +1,54 @@
-'use strict';
+import Fs from 'node:fs';
+import Path from 'node:path';
+import { createRequire } from 'node:module';
 
-var Fs = require('fs');
-var Path = require('path');
+const nodeRequire = createRequire(import.meta.url);
 
-var internals = {};
-var defaultOptions = {
+const defaultOptions = {
   cwd: process.cwd(),
-  filePattern: /.+?\.(js|json)$/i,
+  filePattern: /.+?\.([cm]?js|json)$/i,
   excludeDirs: ['node_modules', '.git'],
-  excludeFiles: ['package.json']
+  excludeFiles: ['package.json'],
 };
 
-module.exports = internals = function(options) {
-  var self = typeof this === 'object' ? this : internals;
+const internals = function init(options) {
+  const self = typeof this === 'object' ? this : internals;
   self.options = applyOptions(options);
   self.files = internals.traverse([self.options.cwd], self.options);
   return self;
 };
 
-internals.untouched = internals.prototype.untouched = function() {
-  var self = typeof this === 'object' ? this : internals;
-  var untouched = [];
+export default internals;
+
+internals.untouched = internals.prototype.untouched = function untouchedFiles() {
+  const self = typeof this === 'object' ? this : internals;
+  const untouched = [];
   if (!self.files) return untouched;
-  self.files.forEach(function(file) {
-    if (!require.cache[file]) {
+  self.files.forEach((file) => {
+    if (!nodeRequire.cache[file]) {
       untouched.push(relativePath(self.options.cwd, file));
     }
   });
   return untouched;
 };
 
-internals.traverse = function(paths, options) {
-
+internals.traverse = function traversePaths(paths, options) {
   function traverse(path) {
+    let files = [];
 
-    var files = [];
-
-    var pathStat = Fs.statSync(path);
+    const pathStat = Fs.statSync(path);
     if (pathStat.isFile()) {
-      var pathDir = Path.dirname(options.cwd);
+      const pathDir = Path.dirname(options.cwd);
       if (keepFile(options, relativePath(pathDir, path))) {
         return path;
       }
       return null;
     }
 
-    Fs.readdirSync(path).forEach(function(filename) {
-      var file = Path.join(path, filename);
+    Fs.readdirSync(path).forEach((filename) => {
+      const file = Path.join(path, filename);
 
-      var stat = Fs.statSync(file);
+      const stat = Fs.statSync(file);
       if (stat.isDirectory() && options.excludeDirs.indexOf(file) === -1) {
         files = files.concat(traverse(file, options));
         return;
@@ -62,14 +62,14 @@ internals.traverse = function(paths, options) {
     return files;
   }
 
-  var testFiles = [];
-  paths.forEach(function(path) {
-    testFiles = testFiles.concat(traverse(path)).filter(function(file) {
+  let testFiles = [];
+  paths.forEach((path) => {
+    testFiles = testFiles.concat(traverse(path)).filter((file) => {
       return file;
     });
   });
 
-  testFiles = testFiles.map(function(path) {
+  testFiles = testFiles.map((path) => {
     return Path.resolve(path);
   });
 
@@ -77,8 +77,8 @@ internals.traverse = function(paths, options) {
 };
 
 function applyOptions(options) {
-  var appliedOptions = {};
-  Object.keys(defaultOptions).forEach(function(key) {
+  const appliedOptions = {};
+  Object.keys(defaultOptions).forEach((key) => {
     if (options && options[key]) {
       if (key === 'excludeDirs') appliedOptions[key] = defaultOptions.excludeDirs.concat(options[key]);
       else if (key === 'excludeFiles') appliedOptions[key] = defaultOptions.excludeFiles.concat(options[key]);
@@ -93,7 +93,7 @@ function applyOptions(options) {
 }
 
 function applyOptionExludeDirs(cwd, option) {
-  var excludeDirs = option.map(function(dir) {
+  const excludeDirs = option.map((dir) => {
     dir = dir.replace(/\/$/, '');
     return Path.normalize(Path.join(cwd, dir));
   });
@@ -102,7 +102,7 @@ function applyOptionExludeDirs(cwd, option) {
 }
 
 function relativePath(from, to) {
-  var relative = Path.relative(from, to);
+  let relative = Path.relative(from, to);
   if (Path.sep !== '/') {
     relative = relative.split(Path.sep).join('/');
   }
