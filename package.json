@@ -1,28 +1,80 @@
 {
   "name": "unnecessary",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Check for files not required throughout the project",
   "author": {
     "name": "Pål Edman",
     "url": "https://github.com/paed01"
   },
-  "main": "index.js",
+  "type": "module",
+  "main": "./dist/main.cjs",
+  "module": "./lib/index.js",
+  "bin": {
+    "unnecessary": "./bin/cli.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./lib/index.js",
+      "require": "./dist/main.cjs"
+    },
+    "./mocha": {
+      "import": "./lib/mocha.js",
+      "require": "./dist/mocha.cjs"
+    },
+    "./lab": {
+      "import": "./lib/lab.js",
+      "require": "./dist/lab.cjs"
+    }
+  },
   "scripts": {
+    "build": "rollup -c",
+    "prepare": "npm run build",
+    "pretest": "npm run build",
     "test": "mocha",
     "posttest": "eslint . --cache",
-    "cov:html": "nyc mocha && nyc report --reporter=html",
-    "test:lcov": "nyc mocha && nyc report --reporter lcov && npm run posttest"
+    "cov:html": "npm run build && c8 --reporter=html --reporter=text mocha",
+    "format": "prettier . --write",
+    "test:lcov": "npm run build && c8 --reporter=lcov mocha && npm run posttest"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/paed01/unnecessary.js.git"
   },
   "engines": {
-    "node": ">= 10"
+    "node": ">=20"
   },
   "files": [
-    "index.js"
+    "lib/",
+    "dist/",
+    "bin/",
+    "CHANGELOG.md"
   ],
+  "unnecessary": {
+    "excludeDirs": [
+      "coverage",
+      ".vscode"
+    ],
+    "excludeFiles": [
+      "package-lock.json",
+      ".prettierrc.json",
+      ".c8rc.json",
+      "eslint.config.js",
+      "rollup.config.js",
+      "lib/index.js",
+      "lib/mocha.js",
+      "lib/lab.js",
+      "lib/report.js",
+      "test/data/lab-script.cjs",
+      "dist/lab.cjs",
+      "test/traverse-test.js",
+      "test/untouched-test.js",
+      "test/cli-test.js",
+      "test/mocha-test.js",
+      "test/lab-test.js",
+      "test/report-test.js",
+      "bin/cli.js"
+    ]
+  },
   "keywords": [
     "unused",
     "unnecessary",
@@ -38,9 +90,14 @@
   },
   "homepage": "https://github.com/paed01/unnecessary.js#readme",
   "devDependencies": {
-    "chai": "^4.3.4",
-    "eslint": "^7.24.0",
-    "mocha": "^8.3.2",
-    "nyc": "^15.1.0"
+    "@eslint/js": "^10.0.1",
+    "@hapi/lab": "^26.0.1",
+    "c8": "^12.0.0",
+    "chai": "^6.2.2",
+    "eslint": "^10.8.0",
+    "globals": "^17.9.0",
+    "mocha": "^11.8.0",
+    "prettier": "^3.9.6",
+    "rollup": "^4.0.0"
   }
 }
