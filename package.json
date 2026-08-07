@@ -9,10 +9,17 @@
   "type": "module",
   "main": "./main.cjs",
   "module": "./index.js",
+  "bin": {
+    "unnecessary": "./bin/cli.js"
+  },
   "exports": {
     ".": {
       "import": "./index.js",
       "require": "./main.cjs"
+    },
+    "./mocha": {
+      "import": "./mocha.js",
+      "require": "./mocha.cjs"
     }
   },
   "scripts": {
@@ -34,8 +41,30 @@
   },
   "files": [
     "index.js",
-    "main.cjs"
+    "main.cjs",
+    "mocha.js",
+    "mocha.cjs",
+    "bin/"
   ],
+  "unnecessary": {
+    "excludeDirs": [
+      "coverage",
+      ".vscode"
+    ],
+    "excludeFiles": [
+      "package-lock.json",
+      ".prettierrc.json",
+      "eslint.config.js",
+      "rollup.config.js",
+      "index.js",
+      "mocha.js",
+      "test/traverse-test.js",
+      "test/untouched-test.js",
+      "test/cli-test.js",
+      "test/mocha-test.js",
+      "bin/cli.js"
+    ]
+  },
   "keywords": [
     "unused",
     "unnecessary",

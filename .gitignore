@@ -12,3 +12,4 @@ package-lock.json
 temp/
 /main.cjs
 .vscode
+/mocha.cjs

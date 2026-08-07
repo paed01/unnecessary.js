@@ -116,6 +116,6 @@ export default [
     },
   },
   {
-    ignores: ['coverage/**/*', 'node_modules/**/*', 'tmp/*', 'dist/*', 'main.cjs'],
+    ignores: ['coverage/**/*', 'node_modules/**/*', 'tmp/*', 'dist/*', 'main.cjs', 'mocha.cjs'],
   },
 ];
