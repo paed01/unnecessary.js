@@ -1,9 +1,11 @@
 import Path from 'node:path';
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 import { expect } from 'chai';
 
-import Unnecessary from '../index.js';
+import Unnecessary from 'unnecessary';
 
 const testFilename = fileURLToPath(import.meta.url);
 
@@ -132,6 +134,30 @@ describe('traverse', () => {
     }).ready;
 
     expect(files).to.have.length(0);
+  });
+
+  // creating symlinks on windows requires developer mode or elevation
+  const itPosix = process.platform === 'win32' ? it.skip : it;
+
+  itPosix('follows symlinks and ignores broken ones', async () => {
+    const dir = mkdtempSync(Path.join(tmpdir(), 'unnecessary-symlink-'));
+    try {
+      mkdirSync(Path.join(dir, 'target-dir'));
+      writeFileSync(Path.join(dir, 'target-dir', 'inside.js'), 'export default 1;\n');
+      writeFileSync(Path.join(dir, 'target.js'), 'export default 1;\n');
+      symlinkSync(Path.join(dir, 'target-dir'), Path.join(dir, 'link-dir'));
+      symlinkSync(Path.join(dir, 'target.js'), Path.join(dir, 'link.js'));
+      symlinkSync(Path.join(dir, 'missing.js'), Path.join(dir, 'broken.js'));
+
+      const files = await Unnecessary({ cwd: dir }).ready;
+
+      expect(files).to.include(Path.join(dir, 'link.js'));
+      expect(files).to.include(Path.join(dir, 'link-dir', 'inside.js'));
+      expect(files).to.include(Path.join(dir, 'target.js'));
+      expect(files).to.not.include(Path.join(dir, 'broken.js'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   describe('instance', () => {

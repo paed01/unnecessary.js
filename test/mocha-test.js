@@ -3,11 +3,11 @@ import { format } from 'node:util';
 
 import { expect } from 'chai';
 
-import { mochaHooks } from '../mocha.js';
+import { mochaHooks } from 'unnecessary/mocha';
 
 describe('mocha root hooks', () => {
   it('afterAll before beforeAll is a noop', async () => {
-    const { mochaHooks: freshHooks } = await import('../mocha.js?uninitiated');
+    const { mochaHooks: freshHooks } = await import('../lib/mocha.js?uninitiated');
     expect(freshHooks.afterAll()).to.be.undefined;
   });
 

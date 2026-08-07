@@ -7,19 +7,23 @@
     "url": "https://github.com/paed01"
   },
   "type": "module",
-  "main": "./main.cjs",
-  "module": "./index.js",
+  "main": "./dist/main.cjs",
+  "module": "./lib/index.js",
   "bin": {
     "unnecessary": "./bin/cli.js"
   },
   "exports": {
     ".": {
-      "import": "./index.js",
-      "require": "./main.cjs"
+      "import": "./lib/index.js",
+      "require": "./dist/main.cjs"
     },
     "./mocha": {
-      "import": "./mocha.js",
-      "require": "./mocha.cjs"
+      "import": "./lib/mocha.js",
+      "require": "./dist/mocha.cjs"
+    },
+    "./lab": {
+      "import": "./lib/lab.js",
+      "require": "./dist/lab.cjs"
     }
   },
   "scripts": {
@@ -28,7 +32,7 @@
     "pretest": "npm run build",
     "test": "mocha",
     "posttest": "eslint . --cache",
-    "cov:html": "npm run build && c8 --reporter=html mocha",
+    "cov:html": "npm run build && c8 --reporter=html --reporter=text mocha",
     "format": "prettier . --write",
     "test:lcov": "npm run build && c8 --reporter=lcov mocha && npm run posttest"
   },
@@ -40,11 +44,10 @@
     "node": ">=20"
   },
   "files": [
-    "index.js",
-    "main.cjs",
-    "mocha.js",
-    "mocha.cjs",
-    "bin/"
+    "lib/",
+    "dist/",
+    "bin/",
+    "CHANGELOG.md"
   ],
   "unnecessary": {
     "excludeDirs": [
@@ -54,14 +57,21 @@
     "excludeFiles": [
       "package-lock.json",
       ".prettierrc.json",
+      ".c8rc.json",
       "eslint.config.js",
       "rollup.config.js",
-      "index.js",
-      "mocha.js",
+      "lib/index.js",
+      "lib/mocha.js",
+      "lib/lab.js",
+      "lib/report.js",
+      "test/data/lab-script.cjs",
+      "dist/lab.cjs",
       "test/traverse-test.js",
       "test/untouched-test.js",
       "test/cli-test.js",
       "test/mocha-test.js",
+      "test/lab-test.js",
+      "test/report-test.js",
       "bin/cli.js"
     ]
   },
@@ -81,6 +91,7 @@
   "homepage": "https://github.com/paed01/unnecessary.js#readme",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@hapi/lab": "^26.0.1",
     "c8": "^12.0.0",
     "chai": "^6.2.2",
     "eslint": "^10.8.0",

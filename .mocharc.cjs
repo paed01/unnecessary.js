@@ -7,5 +7,5 @@ module.exports = {
   recursive: false,
   spec: ['test/*-test.js'],
   timeout: 1000,
-  require: ['./mocha.cjs'],
+  require: ['./dist/mocha.cjs'],
 };

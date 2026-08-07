@@ -1,7 +1,8 @@
 import Path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { pathToFileURL } from 'node:url';
 
 import { expect } from 'chai';
 
@@ -20,15 +21,16 @@ describe('cli', () => {
   });
 
   it('runs command with NODE_V8_COVERAGE and reports untouched files', () => {
-    const stdout = execFileSync(
-      process.execPath,
-      ['bin/cli.js', process.execPath, '--input-type=module', '-e', "import './test/data/arbitrary.js';"],
-      {
-        cwd: Path.resolve('.'),
-        env: cliEnv,
-        encoding: 'utf8',
-      },
-    );
+    // an inline -e script gets mangled by naive shell argument joining on
+    // windows, where the cli spawns through cmd.exe - use a script file
+    const scriptFile = Path.join(cliCoverageDir, 'import-arbitrary.mjs');
+    writeFileSync(scriptFile, `import ${JSON.stringify(pathToFileURL(Path.resolve('test/data/arbitrary.js')).href)};\n`);
+
+    const stdout = execFileSync(process.execPath, ['bin/cli.js', process.execPath, scriptFile], {
+      cwd: Path.resolve('.'),
+      env: cliEnv,
+      encoding: 'utf8',
+    });
 
     expect(stdout).to.include('potentially unused');
     expect(stdout).to.include('test/data/arbitrary.json');

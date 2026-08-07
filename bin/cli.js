@@ -5,7 +5,8 @@ import Path from 'node:path';
 import { spawn } from 'node:child_process';
 import { tmpdir } from 'node:os';
 
-import Unnecessary from '../index.js';
+import Unnecessary from '../lib/index.js';
+import { formatReport } from '../lib/report.js';
 
 const { options, command } = parseArgs(process.argv.slice(2));
 
@@ -58,10 +59,7 @@ async function report(coverageDir) {
     console.log('\x1b[32mNo potentially unused files found\x1b[0m');
     return;
   }
-  console.log('\x1b[31mFound %d potentially unused file%s:\x1b[0m', untouched.length, untouched.length > 1 ? 's' : '');
-  untouched.forEach((file) => {
-    console.log('\x1b[33m  %s\x1b[0m', file);
-  });
+  console.log(formatReport(untouched));
 }
 
 function displayPath(cwd, file) {
