@@ -2,6 +2,10 @@ const generatedCode = {
   constBindings: true,
 };
 
+// rollup resolves the external ./index.js import to an absolute id - match with
+// both separators since the id keeps backslashes on windows
+const mainPath = (id) => (/[\\/]index\.js$/.test(id) ? './main.cjs' : id);
+
 export default [
   {
     input: './lib/index.js',
@@ -20,7 +24,7 @@ export default [
       file: './dist/mocha.cjs',
       format: 'cjs',
       exports: 'named',
-      paths: (id) => (id.endsWith('/index.js') ? './main.cjs' : id),
+      paths: mainPath,
       generatedCode,
     },
   },
@@ -31,7 +35,7 @@ export default [
       file: './dist/lab.cjs',
       format: 'cjs',
       exports: 'default',
-      paths: (id) => (id.endsWith('/index.js') ? './main.cjs' : id),
+      paths: mainPath,
       generatedCode,
     },
   },
