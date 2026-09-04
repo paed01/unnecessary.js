@@ -29,6 +29,17 @@ export default [
     },
   },
   {
+    input: './lib/node-test.js',
+    external: [/^node:/, './index.js'],
+    output: {
+      file: './dist/node-test.cjs',
+      format: 'cjs',
+      exports: 'default',
+      paths: mainPath,
+      generatedCode,
+    },
+  },
+  {
     input: './lib/lab.js',
     external: [/^node:/, './index.js'],
     output: {

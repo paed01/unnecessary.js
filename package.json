@@ -1,6 +1,6 @@
 {
   "name": "unnecessary",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Check for files not required throughout the project",
   "author": {
     "name": "Pål Edman",
@@ -12,18 +12,39 @@
   "bin": {
     "unnecessary": "./bin/cli.js"
   },
+  "types": "./types/index.d.ts",
   "exports": {
     ".": {
-      "import": "./lib/index.js",
-      "require": "./dist/main.cjs"
+      "require": {
+        "types": "./types/index.d.cts",
+        "default": "./dist/main.cjs"
+      },
+      "types": "./types/index.d.ts",
+      "import": "./lib/index.js"
     },
     "./mocha": {
-      "import": "./lib/mocha.js",
-      "require": "./dist/mocha.cjs"
+      "require": {
+        "types": "./types/mocha.d.cts",
+        "default": "./dist/mocha.cjs"
+      },
+      "types": "./types/mocha.d.ts",
+      "import": "./lib/mocha.js"
     },
     "./lab": {
-      "import": "./lib/lab.js",
-      "require": "./dist/lab.cjs"
+      "require": {
+        "types": "./types/lab.d.cts",
+        "default": "./dist/lab.cjs"
+      },
+      "types": "./types/lab.d.ts",
+      "import": "./lib/lab.js"
+    },
+    "./node-test": {
+      "require": {
+        "types": "./types/node-test.d.cts",
+        "default": "./dist/node-test.cjs"
+      },
+      "types": "./types/node-test.d.ts",
+      "import": "./lib/node-test.js"
     }
   },
   "scripts": {
@@ -31,10 +52,12 @@
     "prepare": "npm run build",
     "pretest": "npm run build",
     "test": "mocha",
-    "posttest": "eslint . --cache",
+    "posttest": "eslint . --cache && npm run test:types && npm run test:md",
     "cov:html": "npm run build && c8 --reporter=html --reporter=text mocha",
     "format": "prettier . --write",
-    "test:lcov": "npm run build && c8 --reporter=lcov mocha && npm run posttest"
+    "test:lcov": "npm run build && c8 --reporter=lcov mocha && npm run posttest",
+    "test:types": "tsc",
+    "test:md": "texample ./README.md"
   },
   "repository": {
     "type": "git",
@@ -43,9 +66,18 @@
   "engines": {
     "node": ">=20"
   },
+  "peerDependencies": {
+    "mocha": "^11.0.0 || ^12.0.0"
+  },
+  "peerDependenciesMeta": {
+    "mocha": {
+      "optional": true
+    }
+  },
   "files": [
     "lib/",
     "dist/",
+    "types/",
     "bin/",
     "CHANGELOG.md"
   ],
@@ -60,17 +92,22 @@
       ".c8rc.json",
       "eslint.config.js",
       "rollup.config.js",
+      "tsconfig.json",
       "lib/index.js",
       "lib/mocha.js",
       "lib/lab.js",
+      "lib/node-test.js",
       "lib/report.js",
       "test/data/lab-script.cjs",
       "dist/lab.cjs",
+      "dist/node-test.cjs",
+      "test/data/node-test-script.cjs",
       "test/traverse-test.js",
       "test/untouched-test.js",
       "test/cli-test.js",
       "test/mocha-test.js",
       "test/lab-test.js",
+      "test/node-test-test.js",
       "test/report-test.js",
       "bin/cli.js"
     ]
@@ -82,7 +119,9 @@
     "require cache",
     "project",
     "tree",
-    "lightweight coverage"
+    "lightweight coverage",
+    "node:test",
+    "typescript"
   ],
   "license": "BSD-3-Clause",
   "bugs": {
@@ -96,8 +135,10 @@
     "chai": "^6.2.2",
     "eslint": "^10.8.0",
     "globals": "^17.9.0",
-    "mocha": "^11.8.0",
+    "mocha": "^12.0.0",
     "prettier": "^3.9.6",
-    "rollup": "^4.0.0"
+    "rollup": "^4.0.0",
+    "texample": "^1.0.2",
+    "typescript": "^7.0.2"
   }
 }

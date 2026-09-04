@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.1.0 - 2026-09-04
+
+### Added
+
+- Declares an optional peer dependency on mocha `^11 || ^12`; the root hook plugin is tested against both
+- Node test runner custom reporter `unnecessary/node-test`, use with `--test-reporter unnecessary/node-test`
+- TypeScript type definitions for `unnecessary`, `unnecessary/mocha`, `unnecessary/lab`, and `unnecessary/node-test`
+
 ## 3.0.0 - 2026-08-07
 
 ### Breaking

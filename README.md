@@ -29,7 +29,7 @@ console.log(unnecessary.untouched());
 
 # Description
 
-Requires node >= 20. Zero dependencies.
+Requires node >= 20. Zero dependencies. Ships TypeScript type definitions for all entry points.
 
 Options:
 
@@ -51,7 +51,7 @@ const unnecessary = Unnecessary({
 
 or require it from CommonJS:
 
-```javascript
+```js
 var unnecessary = require('unnecessary')({
   filePattern: /\.js$/i,
 });
@@ -65,7 +65,7 @@ The project tree is traversed asynchronously, starting at construction:
 
 When testing has completed run
 
-```javascript
+```js
 var unusedScriptsOrJsons = unnecessary.untouched();
 ```
 
@@ -128,7 +128,7 @@ If `NODE_V8_COVERAGE` is already set (e.g. when composed with c8), the existing 
 
 # Mocha root hooks
 
-The package ships a [root hook plugin](https://mochajs.org/#root-hook-plugins) that traverses the project tree in `beforeAll` and reports potentially unused files in `afterAll`:
+The package ships a [root hook plugin](https://mochajs.org/#root-hook-plugins) that traverses the project tree in `beforeAll` and reports potentially unused files in `afterAll`. Mocha 11 and 12 are supported:
 
 ```sh
 mocha --require unnecessary/mocha
@@ -136,7 +136,7 @@ mocha --require unnecessary/mocha
 
 or in `.mocharc`:
 
-```javascript
+```js
 module.exports = {
   require: ['unnecessary/mocha'],
 };
@@ -156,6 +156,24 @@ Options are read from an `unnecessary` field in `package.json`. `filePattern` ma
 
 Remember that ESM sources loaded with `import` are only detected under `NODE_V8_COVERAGE`/c8 - exclude them or combine with the coverage mechanism above. In mocha `--parallel` mode root hooks run per worker process; prefer the cli or c8 composition there.
 
+# Node test runner
+
+A custom [test reporter](https://nodejs.org/api/test.html#custom-reporters) for `node:test` that reports potentially unused files once the run has completed. Since a custom reporter replaces the default one, combine it with a regular reporter and give each a destination:
+
+```sh
+node --test --test-reporter spec --test-reporter-destination stdout --test-reporter unnecessary/node-test --test-reporter-destination stdout
+```
+
+Options are read from the same `unnecessary` field in `package.json` as the mocha plugin.
+
+Keep in mind that `node --test` runs each test file in a child process, invisible to the reporter's require cache. Set `NODE_V8_COVERAGE` (or run through c8) so files loaded by the children are detected through coverage, or let the cli do it for you:
+
+```sh
+unnecessary node --test
+```
+
+Running a test file directly (`node --test-reporter unnecessary/node-test test/some-test.js`) keeps everything in one process, where plain require-cache detection works for CommonJS.
+
 # Lab reporter
 
 For [@hapi/lab](https://github.com/hapijs/lab) the package ships a custom reporter - lab has no root hook equivalent, but reporters are constructed in the main process and `end()` is awaited on completion, which serves the same purpose:
@@ -174,7 +192,7 @@ To roll the report by hand instead - for other frameworks, or to customize outpu
 
 Example `.mocharc.cjs` that doubles as reporter setup:
 
-```javascript
+```js
 'use strict';
 
 const Unnecessary = require('unnecessary');
