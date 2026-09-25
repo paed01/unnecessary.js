@@ -1,13 +1,28 @@
-unnecessary
-===========
+# unnecessary
 
 [![Build](https://github.com/paed01/unnecessary.js/actions/workflows/build.yaml/badge.svg)](https://github.com/paed01/unnecessary.js/actions/workflows/build.yaml)
 [![Build (Windows)](https://github.com/paed01/unnecessary.js/actions/workflows/build-windows.yaml/badge.svg)](https://github.com/paed01/unnecessary.js/actions/workflows/build-windows.yaml)
-[![Coverage Status](https://coveralls.io/repos/github/paed01/unnecessary.js/badge.svg?branch=default)](https://coveralls.io/github/paed01/unnecessary.js?branch=default)
+[![Coverage Status](https://coveralls.io/repos/github/paed01/unnecessary.js/badge.svg?branch=main)](https://coveralls.io/github/paed01/unnecessary.js?branch=main)
 
 Keep track of your files. Lightweight coverage for huge projects. Check for files never required or imported throughout testing. Compares the project tree with the require cache and, when available, V8 coverage.
 
-Three ways to use it:
+<!-- toc -->
+
+- [Usage](#usage)
+- [Options](#options)
+- [API](#api)
+- [ESM and the require cache](#esm-and-the-require-cache)
+- [CLI](#cli)
+- [Mocha root hooks](#mocha-root-hooks)
+- [Node test runner](#node-test-runner)
+- [Lab reporter](#lab-reporter)
+- [Report after test completion](#report-after-test-completion)
+
+<!-- /toc -->
+
+## Usage
+
+Wrap any test command, plug into your test runner, or use the library directly:
 
 ```sh
 # wrap any test command, c8 style
@@ -15,6 +30,12 @@ npx unnecessary mocha
 
 # mocha root hook plugin
 mocha --require unnecessary/mocha
+
+# node:test reporter
+node --test --test-reporter spec --test-reporter-destination stdout --test-reporter unnecessary/node-test --test-reporter-destination stdout
+
+# @hapi/lab reporter
+lab -r console -r unnecessary/lab -o stdout -o stdout
 ```
 
 ```javascript
@@ -27,16 +48,18 @@ await unnecessary.ready;
 console.log(unnecessary.untouched());
 ```
 
-# Description
+Requires node >= 20. Zero dependencies.
 
-Requires node >= 20. Zero dependencies. Ships TypeScript type definitions for all entry points.
-
-Options:
+## Options
 
 - `cwd`: Project working directory, defaults to `process.cwd()`
 - `filePattern`: Regex pattern, defaults to js, cjs, mjs, and json extensions
-- `excludeDirs`: Array with directories to exclude, use relative paths, e.g. `app/assets`. Default is `node_modules` and `.git`. Option is appended to the default list
-- `excludeFiles`: Array with files to exclude, use relative paths, e.g. `test/data/arbitrary.json`. Default is `package.json`. Option is appended to the default list
+- `excludeDirs`: Array with directories to exclude, use relative paths, e.g. `app/assets`, or glob patterns, e.g. `**/fixtures`. Default is `node_modules` and `.git`. Option is appended to the default list
+- `excludeFiles`: Array with files to exclude, use relative paths, e.g. `test/data/arbitrary.json`, or glob patterns, e.g. `test/**/*.json`. Default is `package.json`. Option is appended to the default list
+
+Glob patterns are matched with [`path.matchesGlob`](https://nodejs.org/api/path.html#pathmatchesglobpath-pattern) against paths relative to `cwd`, and require node >= 20.17. Node emits an experimental warning before 22.17, the first time a pattern is matched. Older versions only match exact paths. As with most glob implementations `*` and `**` skip dot entries, use e.g. `**/.*` to match them.
+
+## API
 
 The module is published as a dual package. Import it from ESM:
 
@@ -52,7 +75,7 @@ const unnecessary = Unnecessary({
 or require it from CommonJS:
 
 ```js
-var unnecessary = require('unnecessary')({
+const unnecessary = require('unnecessary')({
   filePattern: /\.js$/i,
 });
 ```
@@ -60,13 +83,13 @@ var unnecessary = require('unnecessary')({
 The project tree is traversed asynchronously, starting at construction:
 
 - `ready`: promise that resolves with the watched files once traversal has completed
-- `files`: the watched files, `null` until `ready` has resolved
+- `files`: the watched files, `null` until `ready` has resolved. Symlinks are followed and files are listed by their real path, like node resolves them when loading
 - `untouched()`: synchronous, returns the watched files that were never loaded - or an empty list if called before `ready` has resolved
 
 When testing has completed run
 
 ```js
-var unusedScriptsOrJsons = unnecessary.untouched();
+const unusedScriptsOrJsons = unnecessary.untouched();
 ```
 
 Calling `untouched()` in a `process.on('exit')` handler works since traversal, kicked off at construction, has long since completed - see the report example below.
@@ -89,7 +112,7 @@ console.log(await unnecessaryCoffee.ready);
 console.log(await unnecessaryJs.ready);
 ```
 
-# ESM and the require cache
+## ESM and the require cache
 
 Touched files are detected by comparing the project tree with the CommonJS require cache (`require.cache`). Files loaded with `require()` register there, but files loaded with ESM `import` live in a separate internal module map that node does not expose. Consequently, ESM source files imported during testing cannot be detected through the require cache alone.
 
@@ -108,13 +131,14 @@ Caveats:
 - JSON files are parsed, not compiled, so they never enter V8 coverage either. They are only detected through the require cache of the reporting process. Both `require()` and ESM `import ... with { type: 'json' }` count - node caches JSON modules in the CommonJS cache regardless of how they were loaded, sharing one parsed copy.
 - Without `NODE_V8_COVERAGE`, only `require()`d files are detected; add imported ESM sources to `excludeFiles`.
 
-# CLI
+## CLI
 
 The package installs an `unnecessary` executable that behaves like c8: it runs the given command with `NODE_V8_COVERAGE` pointing to a temporary directory and reports potentially unused files when the command exits, passing the exit code through.
 
 ```sh
 unnecessary mocha
 unnecessary --exclude-dir coverage --exclude-file data/known-good.json -- npm test
+unnecessary --exclude-dir '**/fixtures' -- npm test
 ```
 
 Arguments:
@@ -124,9 +148,11 @@ Arguments:
 - `--cwd <dir>`: forwarded to the `cwd` option. Reported paths are rebased on the invoking directory (absolute when outside it) so they stay cmd+clickable in the terminal
 - `--`: optional separator; parsing stops at the first unrecognized argument either way
 
+Directories and files may be [glob patterns](#options) - quote them so the shell passes them through unexpanded.
+
 If `NODE_V8_COVERAGE` is already set (e.g. when composed with c8), the existing directory is reused and left in place. Note that node re-injects `NODE_V8_COVERAGE` into child process environments whenever coverage is active in the parent - removing the variable from a child's env has no effect, it can only be redirected by overriding it with another value. Since the report is produced in a separate process, require-cache detection does not apply here — everything is coverage based, so the JSON caveat above applies to all JSON files.
 
-# Mocha root hooks
+## Mocha root hooks
 
 The package ships a [root hook plugin](https://mochajs.org/#root-hook-plugins) that traverses the project tree in `beforeAll` and reports potentially unused files in `afterAll`. Mocha 11 and 12 are supported:
 
@@ -156,7 +182,7 @@ Options are read from an `unnecessary` field in `package.json`. `filePattern` ma
 
 Remember that ESM sources loaded with `import` are only detected under `NODE_V8_COVERAGE`/c8 - exclude them or combine with the coverage mechanism above. In mocha `--parallel` mode root hooks run per worker process; prefer the cli or c8 composition there.
 
-# Node test runner
+## Node test runner
 
 A custom [test reporter](https://nodejs.org/api/test.html#custom-reporters) for `node:test` that reports potentially unused files once the run has completed. Since a custom reporter replaces the default one, combine it with a regular reporter and give each a destination:
 
@@ -174,7 +200,7 @@ unnecessary node --test
 
 Running a test file directly (`node --test-reporter unnecessary/node-test test/some-test.js`) keeps everything in one process, where plain require-cache detection works for CommonJS.
 
-# Lab reporter
+## Lab reporter
 
 For [@hapi/lab](https://github.com/hapijs/lab) the package ships a custom reporter - lab has no root hook equivalent, but reporters are constructed in the main process and `end()` is awaited on completion, which serves the same purpose:
 
@@ -186,7 +212,7 @@ lab -r unnecessary/lab
 
 Options are read from the same `unnecessary` field in `package.json` as the mocha plugin. Since lab runs everything in a single process, plain require-cache detection works well for CommonJS projects - no coverage setup needed. Combine with `NODE_V8_COVERAGE`/the cli for ESM projects.
 
-# Report after test completion
+## Report after test completion
 
 To roll the report by hand instead - for other frameworks, or to customize output - listen for process exit. This is roughly what `unnecessary/mocha` does for you, minus the hooks.
 

@@ -1,6 +1,6 @@
 {
   "name": "unnecessary",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "Check for files not required throughout the project",
   "author": {
     "name": "Pål Edman",
@@ -48,7 +48,7 @@
     }
   },
   "scripts": {
-    "build": "rollup -c",
+    "build": "npm run toc && rollup -c",
     "prepare": "npm run build",
     "pretest": "npm run build",
     "test": "mocha",
@@ -57,7 +57,8 @@
     "format": "prettier . --write",
     "test:lcov": "npm run build && c8 --reporter=lcov mocha && npm run posttest",
     "test:types": "tsc",
-    "test:md": "texample ./README.md"
+    "test:md": "texample ./README.md",
+    "toc": "toc -c ./README.md"
   },
   "repository": {
     "type": "git",
@@ -129,6 +130,7 @@
   },
   "homepage": "https://github.com/paed01/unnecessary.js#readme",
   "devDependencies": {
+    "@0dep/toc": "^2.1.0",
     "@eslint/js": "^10.0.1",
     "@hapi/lab": "^26.0.1",
     "c8": "^12.0.0",

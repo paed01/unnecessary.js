@@ -1,6 +1,6 @@
 import Path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
@@ -80,6 +80,32 @@ describe('#untouched', () => {
     expect(untouched).to.include('test/data/arbitrary.json');
 
     delete nodeRequire.cache[nodeRequire.resolve('./data/arbitrary.cjs')];
+  });
+
+  const itPosix = process.platform === 'win32' ? it.skip : it;
+
+  itPosix('files loaded through symlinks are considered touched', async () => {
+    const dir = realpathSync(mkdtempSync(Path.join(tmpdir(), 'unnecessary-symlink-')));
+    try {
+      mkdirSync(Path.join(dir, 'target-dir'));
+      writeFileSync(Path.join(dir, 'target-dir', 'inside.cjs'), 'module.exports = 1;\n');
+      writeFileSync(Path.join(dir, 'target.cjs'), 'module.exports = 1;\n');
+      writeFileSync(Path.join(dir, 'untouched.cjs'), 'module.exports = 1;\n');
+      symlinkSync(Path.join(dir, 'target-dir'), Path.join(dir, 'link-dir'));
+      symlinkSync(Path.join(dir, 'target.cjs'), Path.join(dir, 'link.cjs'));
+
+      nodeRequire(Path.join(dir, 'link-dir', 'inside.cjs'));
+      nodeRequire(Path.join(dir, 'link.cjs'));
+
+      const unnecessary = Unnecessary({ cwd: dir });
+      await unnecessary.ready;
+
+      expect(unnecessary.untouched()).to.deep.equal(['untouched.cjs']);
+    } finally {
+      delete nodeRequire.cache[Path.join(dir, 'target-dir', 'inside.cjs')];
+      delete nodeRequire.cache[Path.join(dir, 'target.cjs')];
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it('files loaded with import are considered touched when NODE_V8_COVERAGE is set', () => {

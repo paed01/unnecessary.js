@@ -3,9 +3,9 @@ export interface UnnecessaryOptions {
   cwd?: string;
   /** File pattern, defaults to js, cjs, mjs, and json extensions */
   filePattern?: RegExp;
-  /** Directories to exclude, relative to `cwd`. Appended to the defaults `node_modules` and `.git` */
+  /** Directories to exclude, relative to `cwd` or glob patterns (node >= 20.17). Appended to the defaults `node_modules` and `.git` */
   excludeDirs?: string[];
-  /** Files to exclude, relative to `cwd`. Appended to the default `package.json` */
+  /** Files to exclude, relative to `cwd` or glob patterns (node >= 20.17). Appended to the default `package.json` */
   excludeFiles?: string[];
 }
 
