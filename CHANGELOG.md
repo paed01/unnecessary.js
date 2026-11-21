@@ -1,5 +1,20 @@
 # Changelog
 
+## 3.3.0 - 2026-11-21
+
+### Added
+
+- The cli reads options from the `unnecessary` field in package.json, cli arguments add to them
+- cli `--coverage-dir <dir>` argument and `coverageDir` package.json option to keep the coverage reports in a directory of choice
+
+### Fixed
+
+- The cli no longer lists coverage reports inside the project as potentially unused
+
+### Misc
+
+- Drop node 20 from build, still works though
+
 ## 3.2.0 - 2026-09-25
 
 ### Added

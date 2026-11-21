@@ -38,6 +38,12 @@ describe('report helpers', () => {
       expect(options.filePattern.flags).to.equal('i');
       expect(options.filePattern.test('FILE.JS')).to.be.true;
     });
+
+    it('reads package.json from the passed directory', () => {
+      writeFileSync(Path.join(dir, 'package.json'), JSON.stringify({ unnecessary: { excludeDirs: ['coverage'] } }));
+
+      expect(loadOptions(dir)).to.deep.equal({ excludeDirs: ['coverage'] });
+    });
   });
 
   describe('formatReport', () => {

@@ -143,12 +143,15 @@ unnecessary --exclude-dir '**/fixtures' -- npm test
 
 Arguments:
 
-- `--exclude-dir <dir>`: forwarded to the `excludeDirs` option, may be repeated
-- `--exclude-file <file>`: forwarded to the `excludeFiles` option, may be repeated
+- `--exclude-dir <dir>`: added to the `excludeDirs` option, may be repeated
+- `--exclude-file <file>`: added to the `excludeFiles` option, may be repeated
 - `--cwd <dir>`: forwarded to the `cwd` option. Reported paths are rebased on the invoking directory (absolute when outside it) so they stay cmd+clickable in the terminal
+- `--coverage-dir <dir>`: keep the coverage reports in this directory instead of a temporary one, clearing reports from a previous run. Also available as `coverageDir` in `package.json`
 - `--`: optional separator; parsing stops at the first unrecognized argument either way
 
 Directories and files may be [glob patterns](#options) - quote them so the shell passes them through unexpanded.
+
+Options are read from the same `unnecessary` field in `package.json` as the [mocha plugin](#mocha-root-hooks) uses - the one in the `--cwd` directory if passed - and the arguments add to them.
 
 If `NODE_V8_COVERAGE` is already set (e.g. when composed with c8), the existing directory is reused and left in place. Note that node re-injects `NODE_V8_COVERAGE` into child process environments whenever coverage is active in the parent - removing the variable from a child's env has no effect, it can only be redirected by overriding it with another value. Since the report is produced in a separate process, require-cache detection does not apply here — everything is coverage based, so the JSON caveat above applies to all JSON files.
 
@@ -197,6 +200,8 @@ Keep in mind that `node --test` runs each test file in a child process, invisibl
 ```sh
 unnecessary node --test
 ```
+
+The cli reads the same `package.json` options and prints the report itself, no reporter needed.
 
 Running a test file directly (`node --test-reporter unnecessary/node-test test/some-test.js`) keeps everything in one process, where plain require-cache detection works for CommonJS.
 

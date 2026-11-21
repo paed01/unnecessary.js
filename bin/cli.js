@@ -6,7 +6,7 @@ import { spawn } from 'node:child_process';
 import { tmpdir } from 'node:os';
 
 import Unnecessary from '../lib/index.js';
-import { formatReport } from '../lib/report.js';
+import { formatReport, loadOptions } from '../lib/report.js';
 
 const { options, command } = parseArgs(process.argv.slice(2));
 
@@ -18,10 +18,10 @@ if (!command.length) {
 }
 
 function run() {
-  const inheritedDir = process.env.NODE_V8_COVERAGE;
-  const coverageDir = inheritedDir ? Path.resolve(inheritedDir) : Fs.mkdtempSync(Path.join(tmpdir(), 'unnecessary-'));
+  const config = loadOptions(options.cwd);
+  const coverage = coverageDirectory(config);
 
-  const env = { ...process.env, NODE_V8_COVERAGE: coverageDir };
+  const env = { ...process.env, NODE_V8_COVERAGE: coverage.dir };
   env.PATH = [Path.join(process.cwd(), 'node_modules', '.bin'), env.PATH].filter(Boolean).join(Path.delimiter);
 
   const child = spawn(command[0], command.slice(1), {
@@ -38,7 +38,7 @@ function run() {
 
   child.on('exit', async (code, signal) => {
     try {
-      await report(coverageDir);
+      await report(coverage.dir, mergeOptions(config, options, coverage.dir));
     } finally {
       cleanup();
     }
@@ -46,13 +46,13 @@ function run() {
   });
 
   function cleanup() {
-    if (!inheritedDir) Fs.rmSync(coverageDir, { recursive: true, force: true });
+    if (coverage.temporary) Fs.rmSync(coverage.dir, { recursive: true, force: true });
   }
 }
 
-async function report(coverageDir) {
+async function report(coverageDir, unnecessaryOptions) {
   process.env.NODE_V8_COVERAGE = coverageDir;
-  const unnecessary = new Unnecessary(options);
+  const unnecessary = new Unnecessary(unnecessaryOptions);
   await unnecessary.ready;
   const untouched = unnecessary.untouched().map((file) => displayPath(unnecessary.options.cwd, file));
   if (!untouched.length) {
@@ -60,6 +60,42 @@ async function report(coverageDir) {
     return;
   }
   console.log(formatReport(untouched));
+}
+
+function coverageDirectory(config) {
+  if (options.coverageDir) return keptCoverageDirectory(Path.resolve(options.coverageDir));
+  if (process.env.NODE_V8_COVERAGE) return { dir: Path.resolve(process.env.NODE_V8_COVERAGE) };
+  if (config?.coverageDir) return keptCoverageDirectory(Path.resolve(options.cwd ?? '.', config.coverageDir));
+  return { dir: Fs.mkdtempSync(Path.join(tmpdir(), 'unnecessary-')), temporary: true };
+}
+
+function keptCoverageDirectory(dir) {
+  Fs.mkdirSync(dir, { recursive: true });
+  // reports left by a previous run would count as touched
+  for (const name of Fs.readdirSync(dir)) {
+    if (/^coverage-\d+-\d+-\d+\.json$/.test(name)) Fs.rmSync(Path.join(dir, name), { force: true });
+  }
+  return { dir };
+}
+
+function mergeOptions(config = {}, args, coverageDir) {
+  const cwd = args.cwd || config.cwd || process.cwd();
+  return {
+    ...config,
+    cwd,
+    excludeDirs: [].concat(config.excludeDirs ?? [], args.excludeDirs, projectRelative(cwd, coverageDir)),
+    excludeFiles: [].concat(config.excludeFiles ?? [], args.excludeFiles),
+  };
+}
+
+function projectRelative(cwd, dir) {
+  let relative;
+  try {
+    relative = Path.relative(Fs.realpathSync(cwd), Fs.realpathSync(dir));
+  } catch {
+    return [];
+  }
+  return !relative || relative.startsWith('..') || Path.isAbsolute(relative) ? [] : [relative];
 }
 
 function displayPath(cwd, file) {
@@ -85,6 +121,8 @@ function parseArgs(argv) {
       parsed.excludeFiles.push(argv[++i]);
     } else if (arg === '--cwd') {
       parsed.cwd = argv[++i];
+    } else if (arg === '--coverage-dir') {
+      parsed.coverageDir = argv[++i];
     } else {
       break;
     }
@@ -93,8 +131,12 @@ function parseArgs(argv) {
 }
 
 function usage() {
-  console.error('Usage: unnecessary [--exclude-dir <dir>]... [--exclude-file <file>]... [--cwd <dir>] [--] <command> [args...]');
+  console.error(
+    'Usage: unnecessary [--exclude-dir <dir>]... [--exclude-file <file>]... [--cwd <dir>] [--coverage-dir <dir>] [--] <command> [args...]',
+  );
   console.error('');
   console.error('Runs <command> with NODE_V8_COVERAGE enabled and reports project files');
   console.error('that were never required or imported, e.g.: unnecessary mocha');
+  console.error('');
+  console.error('Options are read from the unnecessary field in package.json, arguments add to them.');
 }
